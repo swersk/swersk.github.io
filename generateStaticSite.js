@@ -8,7 +8,7 @@ const ejs = require('ejs');
 // Read and parse the XML file
 const xmlFilePath = path.join(__dirname, 'laurenswersky.wordpress.2024-07-28.000.xml');
 const xmlData = fs.readFileSync(xmlFilePath, 'utf-8');
-const parser = new XMLParser();
+const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_' });
 const jsonObj = parser.parse(xmlData);
 
 // Extract posts and attachments
@@ -51,7 +51,7 @@ fs.ensureDirSync(outputDir);
         if (post['wp:post_type'] === 'post' && post['pubDate']) {
             post['content:encoded'] = post['content:encoded']
                 .split(/\r?\n|\r|\n/g)
-                .reduce((accumulator, currentValue) => accumulator + `<p>${currentValue}</p>`, '');
+                .reduce((accumulator, currentValue) => accumulator + `${currentValue}`, '');
 
             const content = await ejs.renderFile(path.join(templateDir, 'post.ejs'), { post: post });
             const postDir = path.join(outputDir, 'archives', post['wp:post_id'].toString());
