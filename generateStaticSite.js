@@ -6,7 +6,7 @@ const { XMLParser } = require('fast-xml-parser');
 const ejs = require('ejs');
 
 // Read and parse the XML file
-const xmlFilePath = path.join(__dirname, 'missionnutrition.wordpress.2024-07-28.000.xml');
+const xmlFilePath = path.join(__dirname, 'laurenswersky.wordpress.2024-07-28.000.xml');
 const xmlData = fs.readFileSync(xmlFilePath, 'utf-8');
 const parser = new XMLParser();
 const jsonObj = parser.parse(xmlData);
@@ -29,18 +29,20 @@ fs.ensureDirSync(outputDir);
         if (post['wp:post_type'] === 'attachment') {
             const url = post['wp:attachment_url'];
             const protocol = url.startsWith('https') ? https : http;
-            for (const post_meta of post['wp:postmeta']) {
-                if (post_meta['wp:meta_key'] === '_wp_attached_file') {
-                    const file_path = post_meta['wp:meta_value'];
-                    const full_path = path.join(outputDir, 'wp-content/uploads', file_path);
-                    fs.ensureDirSync(path.dirname(full_path));
-                    const file = fs.createWriteStream(full_path);
-                    protocol.get(url, (resp) => {
-                        resp.pipe(file);
-                        file.on("finish", () => {
-                            file.close();
+            if (Array.isArray(post['wp:postmeta'])) {
+                for (const post_meta of post['wp:postmeta']) {
+                    if (post_meta['wp:meta_key'] === '_wp_attached_file') {
+                        const file_path = post_meta['wp:meta_value'];
+                        const full_path = path.join(outputDir, 'wp-content/uploads', file_path);
+                        fs.ensureDirSync(path.dirname(full_path));
+                        const file = fs.createWriteStream(full_path);
+                        protocol.get(url, (resp) => {
+                            resp.pipe(file);
+                            file.on("finish", () => {
+                                file.close();
+                            });
                         });
-                    });
+                    }
                 }
             }
         }
