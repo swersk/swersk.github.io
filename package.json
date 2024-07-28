@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "fast-xml-parser": "^4.4.1",
+    "fs-extra": "^11.2.0"
+  }
+}
