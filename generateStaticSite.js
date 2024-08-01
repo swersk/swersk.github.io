@@ -5,6 +5,13 @@ const https = require('https');
 const { XMLParser } = require('fast-xml-parser');
 const ejs = require('ejs');
 
+// Function to decode HTML entities
+function decodeHtml(html) {
+    const txt = document.createElement('textarea');
+    txt.innerHTML = html;
+    return txt.value;
+}
+
 // Read and parse the XML file
 const xmlFilePath = path.join(__dirname, 'laurenswersky.wordpress.2024-07-28.000.xml');
 const xmlData = fs.readFileSync(xmlFilePath, 'utf-8');
@@ -49,6 +56,9 @@ fs.ensureDirSync(outputDir);
 
         // Generate post page if it's published
         if (post['wp:post_type'] === 'post' && post['pubDate']) {
+            // Decode HTML entities
+            post['content:encoded'] = decodeHtml(post['content:encoded']);
+
             post['content:encoded'] = post['content:encoded']
                 .split(/\r?\n|\r|\n/g)
                 .reduce((accumulator, currentValue) => accumulator + `${currentValue}`, '');
