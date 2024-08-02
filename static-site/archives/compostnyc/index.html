@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CompostNYC</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <h1>CompostNYC</h1>
+    <div>
+<h1 >A Proximity-Based 3D Visualization to Help New Yorkers Find Compost Bins 🗽🌱</h1>
+
+
+
+<h2 >Introduction</h2>
+
+
+
+<p>Welcome to an exciting new way to explore composting in New York City! I created CompostNYC  to help NYers understand how far your building is from the nearest composting location. With the growing awareness of environmental sustainability, this tool aims to make composting more accessible for NYC residents.</p>
+
+
+<figure ><a href="https://laurenswersky.com/wp-content/uploads/2023/08/screenshot-2023-08-26-at-2.30.35-pm.png"><img src="https://laurenswersky.com/wp-content/uploads/2023/08/screenshot-2023-08-26-at-2.30.35-pm.png?w=1024" alt="" class="wp-image-812" /></a></figure>
+
+
+
+<hr  />
+
+
+
+<h2 >The Build Process</h2>
+
+
+
+<h3 >Phase 1: Data Collection</h3>
+
+
+
+<ul>
+<li>Obtained composite site location data and NYC building data.</li>
+</ul>
+
+
+
+<p><strong>Data Sources:</strong></p>
+
+
+
+<ul>
+<li>NYC OpenData</li>
+
+
+
+<li>BigQuery</li>
+
+
+
+<li>PLUTO from CARTO data warehouse</li>
+</ul>
+
+
+
+<hr  />
+
+
+
+<h3 >Phase 2: Spatial Analyses</h3>
+
+
+
+<ul>
+<li>Goal: To determine which buildings are within various distances from the nearest compost bin.</li>
+
+
+
+<li>Wrote SQL commands to identify buildings within specific distances (e.g., 83m equivalent to 1 block, 3 blocks, and 5 blocks).</li>
+</ul>
+
+
+
+<p><strong>Sample SQL Query:</strong></p>
+
+
+
+<pre >SELECT
+    b.* -- Select all columns from building_locations
+FROM
+    carto-demo-data.demo_tables.manhattan_pluto_data b,
+    carto-dw-ac-zp3r15zi.shared.CompostNYC c
+WHERE
+    ST_DWithin(b.geom, c.geom, 400);</pre>
+
+
+
+<hr  />
+
+
+
+<h3 >Phase 3: Adding a CARTO Layer</h3>
+
+
+
+<ul>
+<li>Visualized the data using the CARTO API for a rich, interactive user experience.</li>
+</ul>
+
+
+
+<hr  />
+
+
+
+<h3 >Phase 4: Rendering the 3D Map</h3>
+
+
+
+<ul>
+<li>Connected to Google Tiles API and rendered the photorealistic tiles on deck.gl for a 3D map visualization.</li>
+</ul>
+
+
+
+<hr  />
+
+
+
+<h3 >Phase 5: Styling the Map</h3>
+
+
+
+<ul>
+<li>After acquiring the necessary data via the CARTO API, we color-coded the buildings according to their proximity to compost bins.</li>
+</ul>
+
+
+
+<hr />
+
+
+
+<h3 >Phase 6: Shipping the Product!</h3>
+
+
+
+<p>After rigorous phases of data collection, analysis, and visualization, we're thrilled to announce that CompostNYC is now live!</p>
+
+
+
+<p>👉 <strong>Check it out:</strong> <a href="https://compost-nyc.vercel.app/">Live link here</a></p>
+
+
+
+<hr  />
+
+
+
+<h2 >Conclusion</h2>
+
+
+
+<p>CompostNYC is more than just a visualization; it's a tool aimed to encourage more sustainable living in New York City. By understanding the proximity of compost bins to residential and commercial buildings, we hope to inspire more people to compost and contribute to a cleaner, greener NYC.</p>
+
+
+
+<p>If you have any questions, comments, or would like to collaborate, feel free to reach out to us. Happy composting, New Yorkers! 🌱🗽</p>
+</div>
+</body>
+</html>

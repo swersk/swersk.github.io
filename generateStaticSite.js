@@ -1,103 +1,17 @@
-const fs = require('fs-extra');
+const fs = require('fs');
 const path = require('path');
-const http = require('http');
-const https = require('https');
-const { XMLParser } = require('fast-xml-parser');
 const ejs = require('ejs');
-const he = require('he'); // Import the he library for HTML decoding
+const xml2js = require('xml2js');
 
-// Read and parse the XML file
-const xmlFilePath = path.join(__dirname, 'laurenswersky.wordpress.2024-07-28.000.xml');
-const xmlData = fs.readFileSync(xmlFilePath, 'utf-8');
-const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_' });
-const jsonObj = parser.parse(xmlData);
+const posts = [
+    {
+        id: 'compostnyc',
+        title: "CompostNYC",
+        content: `<!-- wp:heading {"level":1} --><h1 class="wp-block-heading">A Proximity-Based 3D Visualization to Help New Yorkers Find Compost Bins 🗽🌱</h1><!-- /wp:heading --><!-- wp:heading --><h2 class="wp-block-heading">Introduction</h2><!-- /wp:heading --><!-- wp:paragraph --><p>Welcome to an exciting new way to explore composting in New York City! I created CompostNYC to help NYers understand how far your building is from the nearest composting location. With the growing awareness of environmental sustainability, this tool aims to make composting more accessible for NYC residents.</p><!-- /wp:paragraph --><!-- wp:image {"align":"center","id":812,"sizeSlug":"large","linkDestination":"media"} --><figure class="wp-block-image aligncenter size-large"><a href="https://laurenswersky.com/wp-content/uploads/2023/08/screenshot-2023-08-26-at-2.30.35-pm.png"><img src="https://laurenswersky.com/wp-content/uploads/2023/08/screenshot-2023-08-26-at-2.30.35-pm.png?w=1024" alt="" class="wp-image-812" /></a></figure><!-- /wp:image --><!-- wp:separator --><hr class="wp-block-separator has-alpha-channel-opacity" /><!-- /wp:separator --><!-- wp:heading --><h2 class="wp-block-heading">The Build Process</h2><!-- /wp:heading --><!-- wp:heading {"level":3} --><h3 class="wp-block-heading">Phase 1: Data Collection</h3><!-- /wp:heading --><!-- wp:list --><ul><!-- wp:list-item --><li>Obtained composite site location data and NYC building data.</li><!-- /wp:list-item --></ul><!-- /wp:list --><!-- wp:paragraph --><p><strong>Data Sources:</strong></p><!-- /wp:paragraph --><!-- wp:list --><ul><!-- wp:list-item --><li>NYC OpenData</li><!-- /wp:list-item --><!-- wp:list-item --><li>BigQuery</li><!-- /wp:list-item --><!-- wp:list-item --><li>PLUTO from CARTO data warehouse</li><!-- /wp:list-item --></ul><!-- /wp:list --><!-- wp:separator --><hr class="wp-block-separator has-alpha-channel-opacity" /><!-- /wp:separator --><!-- wp:heading {"level":3} --><h3 class="wp-block-heading">Phase 2: Spatial Analyses</h3><!-- /wp:heading --><!-- wp:list --><ul><!-- wp:list-item --><li>Goal: To determine which buildings are within various distances from the nearest compost bin.</li><!-- /wp:list-item --><!-- wp:list-item --><li>Wrote SQL commands to identify buildings within specific distances (e.g., 83m equivalent to 1 block, 3 blocks, and 5 blocks).</li><!-- /wp:list-item --></ul><!-- /wp:list --><!-- wp:paragraph --><p><strong>Sample SQL Query:</strong></p><!-- /wp:paragraph --><!-- wp:syntaxhighlighter/code --><pre class="wp-block-syntaxhighlighter-code">SELECT b.* -- Select all columns from building_locations FROM carto-demo-data.demo_tables.manhattan_pluto_data b, carto-dw-ac-zp3r15zi.shared.CompostNYC c WHERE ST_DWithin(b.geom, c.geom, 400);</pre><!-- /wp:syntaxhighlighter/code --><!-- wp:separator --><hr class="wp-block-separator has-alpha-channel-opacity" /><!-- /wp:separator --><!-- wp:heading {"level":3} --><h3 class="wp-block-heading">Phase 3: Adding a CARTO Layer</h3><!-- /wp:heading --><!-- wp:list --><ul><!-- wp:list-item --><li>Visualized the data using the CARTO API for a rich, interactive user experience.</li><!-- /wp:list-item --></ul><!-- /wp:list --><!-- wp:separator --><hr class="wp-block-separator has-alpha-channel-opacity" /><!-- /wp:separator --><!-- wp:heading {"level":3} --><h3 class="wp-block-heading">Phase 4: Rendering the 3D Map</h3><!-- /wp:heading --><!-- wp:list --><ul><!-- wp:list-item --><li>Connected to Google Tiles API and rendered the photorealistic tiles on deck.gl for a 3D map visualization.</li><!-- /wp:list-item --></ul><!-- /wp:list --><!-- wp:separator --><hr class="wp-block-separator has-alpha-channel-opacity" /><!-- /wp:separator --><!-- wp:heading {"level":3} --><h3 class="wp-block-heading">Phase 5: Styling the Map</h3><!-- /wp:heading --><!-- wp:list --><ul><!-- wp:list-item --><li>After acquiring the necessary data via the CARTO API, we color-coded the buildings according to their proximity to compost bins.</li><!-- /wp:list-item --></ul><!-- /wp:list --><!-- wp:separator --><hr class="wp-block-separator has-alpha-channel-opacity" /><!-- /wp:separator --><!-- wp:heading {"level":3} --><h3 class="wp-block-heading">Phase 6: Shipping the Product!</h3><!-- /wp:heading --><!-- wp:paragraph --><p>After rigorous phases of data collection, analysis, and visualization, we're thrilled to announce that CompostNYC is now live!</p><!-- /wp:paragraph --><!-- wp:paragraph --><p>👉 <strong>Check it out:</strong> <a href="https://compost-nyc.vercel.app/">Live link here</a></p><!-- /wp:paragraph --><!-- wp:separator --><hr class="wp-block-separator has-alpha-channel-opacity" /><!-- /wp:separator --><!-- wp:heading --><h2 class="wp-block-heading">Conclusion</h2><!-- /wp:heading --><!-- wp:paragraph --><p>CompostNYC is more than just a visualization; it's a tool aimed to encourage more sustainable living in New York City. By understanding the proximity of compost bins to residential and commercial buildings, we hope to inspire more people to compost and contribute to a cleaner, greener NYC.</p><!-- /wp:paragraph --><!-- wp:paragraph --><p>If you have any questions, comments, or would like to collaborate, feel free to reach out to us. Happy composting, New Yorkers! 🌱🗽</p><!-- /wp:paragraph>`
+    },
+];
 
-// Extract posts and attachments
-const posts = jsonObj.rss.channel.item;
-
-// Define paths
-const outputDir = path.join(__dirname, 'static-site');
-const templateDir = path.join(__dirname, 'templates');
-fs.ensureDirSync(outputDir);
-
-// Function to download a file
-async function downloadFile(url, dest) {
-    const protocol = url.startsWith('https') ? https : http;
-    return new Promise((resolve, reject) => {
-        const file = fs.createWriteStream(dest);
-        protocol.get(url, (response) => {
-            response.pipe(file);
-            file.on('finish', () => {
-                file.close(resolve);
-            });
-        }).on('error', (err) => {
-            fs.unlink(dest);
-            reject(err);
-        });
-    });
-}
-
-// Process each post and attachment
-(async function() {
-    let pinned_posts = [];
-    let post_list = [];
-
-    for (const post of posts) {
-        // Download attachments
-        if (post['wp:post_type'] === 'attachment') {
-            const url = post['wp:attachment_url'];
-            if (Array.isArray(post['wp:postmeta'])) {
-                for (const post_meta of post['wp:postmeta']) {
-                    if (post_meta['wp:meta_key'] === '_wp_attached_file') {
-                        const file_path = post_meta['wp:meta_value'];
-                        const full_path = path.join(outputDir, 'wp-content/uploads', file_path);
-                        fs.ensureDirSync(path.dirname(full_path));
-                        await downloadFile(url, full_path);
-                    }
-                }
-            }
-        }
-
-        // Generate post page if it's published
-        if (post['wp:post_type'] === 'post' && post['pubDate']) {
-            post['content:encoded'] = he.decode(post['content:encoded']
-                .split(/\r?\n|\r|\n/g)
-                .reduce((accumulator, currentValue) => accumulator + `${currentValue}`, ''));
-
-            const content = await ejs.renderFile(path.join(templateDir, 'post.ejs'), { post: post });
-            const postDir = path.join(outputDir, 'archives', post['wp:post_id'].toString());
-            fs.ensureDirSync(postDir);
-            fs.writeFileSync(path.join(postDir, 'index.html'), content);
-
-            const element = {
-                id: post['wp:post_id'].toString(),
-                title: post.title,
-                summary: post['content:encoded'].replace(/<[^>]*>?/gm, '').slice(0, 300)
-            };
-
-            // Assuming 'pinned_post_ids' is an array of strings or numbers
-            if (['pinned_post_ids'].includes(post['wp:post_id'])) {
-                pinned_posts.push(element);
-            } else {
-                post_list.push(element);
-            }
-        }
-    }
-
-    // Generate table of contents (toc)
-    pinned_posts.sort((a, b) => b.id - a.id);
-    let merged_posts = pinned_posts.concat(post_list.sort((a, b) => b.id - a.id));
-
-    // Generate README.md
-    let readme = `# My WordPress Blog\nThis is a backup of my WordPress blog.\n\n`;
-    merged_posts.forEach(post => {
-        readme += `[${post.title}](archives/${post.id})\n\n`;
-    });
-    fs.writeFileSync(path.join(outputDir, 'README.md'), readme);
-
-    // Generate index.html (table of contents)
-    const tocContent = await ejs.renderFile(path.join(templateDir, 'toc.ejs'), { posts: merged_posts });
-    fs.writeFileSync(path.join(outputDir, 'index.html'), tocContent);
-
-    console.log('Static site generated successfully.');
-})();
+posts.forEach(post => {
+    const html = ejs.renderFile(path.join(__dirname, 'templates', 'post.ejs'), { post });
+    fs.writeFileSync(path.join(__dirname, 'static-site', 'archives', post.id, 'index.html'), html, 'utf8');
+});
