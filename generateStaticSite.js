@@ -1,17 +1,71 @@
 const fs = require('fs');
 const path = require('path');
 const ejs = require('ejs');
-const xml2js = require('xml2js');
 
 const posts = [
     {
         id: 'compostnyc',
         title: "CompostNYC",
-        content: `<!-- wp:heading {"level":1} --><h1 class="wp-block-heading">A Proximity-Based 3D Visualization to Help New Yorkers Find Compost Bins 🗽🌱</h1><!-- /wp:heading --><!-- wp:heading --><h2 class="wp-block-heading">Introduction</h2><!-- /wp:heading --><!-- wp:paragraph --><p>Welcome to an exciting new way to explore composting in New York City! I created CompostNYC to help NYers understand how far your building is from the nearest composting location. With the growing awareness of environmental sustainability, this tool aims to make composting more accessible for NYC residents.</p><!-- /wp:paragraph --><!-- wp:image {"align":"center","id":812,"sizeSlug":"large","linkDestination":"media"} --><figure class="wp-block-image aligncenter size-large"><a href="https://laurenswersky.com/wp-content/uploads/2023/08/screenshot-2023-08-26-at-2.30.35-pm.png"><img src="https://laurenswersky.com/wp-content/uploads/2023/08/screenshot-2023-08-26-at-2.30.35-pm.png?w=1024" alt="" class="wp-image-812" /></a></figure><!-- /wp:image --><!-- wp:separator --><hr class="wp-block-separator has-alpha-channel-opacity" /><!-- /wp:separator --><!-- wp:heading --><h2 class="wp-block-heading">The Build Process</h2><!-- /wp:heading --><!-- wp:heading {"level":3} --><h3 class="wp-block-heading">Phase 1: Data Collection</h3><!-- /wp:heading --><!-- wp:list --><ul><!-- wp:list-item --><li>Obtained composite site location data and NYC building data.</li><!-- /wp:list-item --></ul><!-- /wp:list --><!-- wp:paragraph --><p><strong>Data Sources:</strong></p><!-- /wp:paragraph --><!-- wp:list --><ul><!-- wp:list-item --><li>NYC OpenData</li><!-- /wp:list-item --><!-- wp:list-item --><li>BigQuery</li><!-- /wp:list-item --><!-- wp:list-item --><li>PLUTO from CARTO data warehouse</li><!-- /wp:list-item --></ul><!-- /wp:list --><!-- wp:separator --><hr class="wp-block-separator has-alpha-channel-opacity" /><!-- /wp:separator --><!-- wp:heading {"level":3} --><h3 class="wp-block-heading">Phase 2: Spatial Analyses</h3><!-- /wp:heading --><!-- wp:list --><ul><!-- wp:list-item --><li>Goal: To determine which buildings are within various distances from the nearest compost bin.</li><!-- /wp:list-item --><!-- wp:list-item --><li>Wrote SQL commands to identify buildings within specific distances (e.g., 83m equivalent to 1 block, 3 blocks, and 5 blocks).</li><!-- /wp:list-item --></ul><!-- /wp:list --><!-- wp:paragraph --><p><strong>Sample SQL Query:</strong></p><!-- /wp:paragraph --><!-- wp:syntaxhighlighter/code --><pre class="wp-block-syntaxhighlighter-code">SELECT b.* -- Select all columns from building_locations FROM carto-demo-data.demo_tables.manhattan_pluto_data b, carto-dw-ac-zp3r15zi.shared.CompostNYC c WHERE ST_DWithin(b.geom, c.geom, 400);</pre><!-- /wp:syntaxhighlighter/code --><!-- wp:separator --><hr class="wp-block-separator has-alpha-channel-opacity" /><!-- /wp:separator --><!-- wp:heading {"level":3} --><h3 class="wp-block-heading">Phase 3: Adding a CARTO Layer</h3><!-- /wp:heading --><!-- wp:list --><ul><!-- wp:list-item --><li>Visualized the data using the CARTO API for a rich, interactive user experience.</li><!-- /wp:list-item --></ul><!-- /wp:list --><!-- wp:separator --><hr class="wp-block-separator has-alpha-channel-opacity" /><!-- /wp:separator --><!-- wp:heading {"level":3} --><h3 class="wp-block-heading">Phase 4: Rendering the 3D Map</h3><!-- /wp:heading --><!-- wp:list --><ul><!-- wp:list-item --><li>Connected to Google Tiles API and rendered the photorealistic tiles on deck.gl for a 3D map visualization.</li><!-- /wp:list-item --></ul><!-- /wp:list --><!-- wp:separator --><hr class="wp-block-separator has-alpha-channel-opacity" /><!-- /wp:separator --><!-- wp:heading {"level":3} --><h3 class="wp-block-heading">Phase 5: Styling the Map</h3><!-- /wp:heading --><!-- wp:list --><ul><!-- wp:list-item --><li>After acquiring the necessary data via the CARTO API, we color-coded the buildings according to their proximity to compost bins.</li><!-- /wp:list-item --></ul><!-- /wp:list --><!-- wp:separator --><hr class="wp-block-separator has-alpha-channel-opacity" /><!-- /wp:separator --><!-- wp:heading {"level":3} --><h3 class="wp-block-heading">Phase 6: Shipping the Product!</h3><!-- /wp:heading --><!-- wp:paragraph --><p>After rigorous phases of data collection, analysis, and visualization, we're thrilled to announce that CompostNYC is now live!</p><!-- /wp:paragraph --><!-- wp:paragraph --><p>👉 <strong>Check it out:</strong> <a href="https://compost-nyc.vercel.app/">Live link here</a></p><!-- /wp:paragraph --><!-- wp:separator --><hr class="wp-block-separator has-alpha-channel-opacity" /><!-- /wp:separator --><!-- wp:heading --><h2 class="wp-block-heading">Conclusion</h2><!-- /wp:heading --><!-- wp:paragraph --><p>CompostNYC is more than just a visualization; it's a tool aimed to encourage more sustainable living in New York City. By understanding the proximity of compost bins to residential and commercial buildings, we hope to inspire more people to compost and contribute to a cleaner, greener NYC.</p><!-- /wp:paragraph --><!-- wp:paragraph --><p>If you have any questions, comments, or would like to collaborate, feel free to reach out to us. Happy composting, New Yorkers! 🌱🗽</p><!-- /wp:paragraph>`
+        content: `<!-- Your HTML content here -->`
     },
+    {
+        id: 'george-carlin',
+        title: "Ask George Carlin: A 21st Century Bot",
+        content: `<!-- Your HTML content here -->`
+    }
 ];
 
+const generatePostHtml = (post) => {
+    return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${post.title}</title>
+        <link rel="stylesheet" href="/styles.css">
+    </head>
+    <body>
+        <h1>${post.title}</h1>
+        <div>${post.content}</div>
+    </body>
+    </html>`;
+};
+
 posts.forEach(post => {
-    const html = ejs.renderFile(path.join(__dirname, 'templates', 'post.ejs'), { post });
-    fs.writeFileSync(path.join(__dirname, 'static-site', 'archives', post.id, 'index.html'), html, 'utf8');
+    const html = generatePostHtml(post);
+    const postDir = path.join(__dirname, 'static-site', 'archives', post.id);
+    if (!fs.existsSync(postDir)) {
+        fs.mkdirSync(postDir, { recursive: true });
+    }
+    fs.writeFileSync(path.join(postDir, 'index.html'), html, 'utf8');
 });
+
+// Generate the main index.html
+const mainIndexHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archive</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Lauren Swersky</h1>
+    <h6>Software / Product / Design</h6>
+    <div class="container">
+        ${posts.map(post => `
+        <a href="archives/${post.id}/index.html" style="color:inherit; text-decoration:none;">
+            <div class="image-container" style="background-image:url('images/${post.id}.png');">
+                <div class="overlay">
+                    ${post.title}
+                </div>
+            </div>
+        </a>
+        `).join('')}
+    </div>
+</body>
+</html>`;
+
+fs.writeFileSync(path.join(__dirname, 'static-site', 'index.html'), mainIndexHtml, 'utf8');
