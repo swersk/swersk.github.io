@@ -35,6 +35,16 @@ const posts = [
         <p>👉 <a href="#">Check it out: Live link here</a></p>
         `
     },
+    {
+        id: 'george-carlin',
+        title: "Ask George Carlin: A 21st Century Bot",
+        content: ` 
+        <h2>Ask George Carlin: A 21st Century Bot</h2>
+        <p>Welcome! This project leverages the power of OpenAI API to bring to life a conversational AI bot modeled after the iconic stand-up comedian, George Carlin.
+I created an asynchronous server-side function using Node.js to interact with OpenAI’s GPT-3 API. The function takes user input and crafts a custom prompt to instruct the GPT-3 model to emulate comedian George Carlin’s unique style and humor. Error handling and input validation ensure the final generated text is sent back as a JSON response.
+Ask George a question at the live link 👉</p><a href="https://george-carlin-bot.vercel.app/">here</a>
+        `
+    }
 ];
 
 const generatePostHtml = (post) => {
