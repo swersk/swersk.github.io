@@ -4,8 +4,7 @@ body {
     color: #333;
 }
 
-h1 {
-    padding: 20px 0;
+h1 { 
     font-size: 2em;
     background-color: #fff;
     margin: 0;
@@ -13,8 +12,7 @@ h1 {
 }
 
 h6 {
-    margin: 0;
-    padding: 10px 0 20px;
+    margin: 0; 
     background-color: #fff;
     font-size: 1em;
     color: #888;
