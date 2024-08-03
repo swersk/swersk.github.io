@@ -5,7 +5,35 @@ const posts = [
     {
         id: 'compostnyc',
         title: "CompostNYC",
-        content: `hi!`
+        content: `
+        A Proximity-Based 3D Visualization to Help New Yorkers Find Compost Bins 🗽🌱
+        <h2>Introduction</h2>
+        <p>Welcome to an exciting new way to explore composting in New York City! CompostNYC helps NYers visualizare far their location is from the nearest composting location.</p>
+        <h2>Method</h2>
+        <h3>Step 1: Source Data</h3>
+        <p>Composite site location data and NYC building data from:</p>
+        <ul>
+            <li>NYC OpenData</li>
+            <li>BigQuery</li>
+            <li>PLUTO from CARTO data warehouse</li>
+        </ul>
+        <h3>Step 2: Spatial Analyses</h3>
+        <p>SQL to measure the nearest compost bin from a given location.</p>
+        <pre><code>
+        SELECT
+            b.* -- Select all columns from building_locations
+        FROM
+            carto-demo-data.demo_tables.manhattan_pluto_data b,
+            carto-dw-ac-zp3r15zi.shared.CompostNYC c
+        WHERE
+            ST_DWithin(b.geom, c.geom, 400);
+        </code></pre>
+        <h3>Step 3: Add a CARTO Layer and 3D Map</h3>
+        <p>Use CARTO API and Google Tiles API to render photorealistic tiles on deck.gl for a 3D map visualization.</p>
+        <h3>Step 4: Style</h3>
+        <p>Color-coded the buildings according to their proximity to compost bins.</p>
+        <p>👉 <a href="#">Check it out: Live link here</a></p>
+        `
     },
 ];
 
