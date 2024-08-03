@@ -1,18 +1,12 @@
 const fs = require('fs');
 const path = require('path');
-const ejs = require('ejs');
 
 const posts = [
     {
         id: 'compostnyc',
         title: "CompostNYC",
-        content: `<!-- Your HTML content here -->`
+        content: `hi!`
     },
-    {
-        id: 'george-carlin',
-        title: "Ask George Carlin: A 21st Century Bot",
-        content: `<!-- Your HTML content here -->`
-    }
 ];
 
 const generatePostHtml = (post) => {
@@ -34,7 +28,7 @@ const generatePostHtml = (post) => {
 
 posts.forEach(post => {
     const html = generatePostHtml(post);
-    const postDir = path.join(__dirname, 'static-site', 'archives', post.id);
+    const postDir = path.join(__dirname, post.id);
     if (!fs.existsSync(postDir)) {
         fs.mkdirSync(postDir, { recursive: true });
     }
@@ -56,7 +50,7 @@ const mainIndexHtml = `
     <h6>Software / Product / Design</h6>
     <div class="container">
         ${posts.map(post => `
-        <a href="archives/${post.id}/index.html" style="color:inherit; text-decoration:none;">
+        <a href="./${post.id}/index.html" style="color:inherit; text-decoration:none;">
             <div class="image-container" style="background-image:url('images/${post.id}.png');">
                 <div class="overlay">
                     ${post.title}
@@ -68,4 +62,4 @@ const mainIndexHtml = `
 </body>
 </html>`;
 
-fs.writeFileSync(path.join(__dirname, 'static-site', 'index.html'), mainIndexHtml, 'utf8');
+fs.writeFileSync(path.join(__dirname, 'index.html'), mainIndexHtml, 'utf8');
